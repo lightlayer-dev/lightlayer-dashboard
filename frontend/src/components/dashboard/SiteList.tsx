@@ -5,7 +5,11 @@ import { Card, CardContent } from "@/components/ui/card"
 import { ScoreRing } from "./ScoreRing"
 import { fetchSites, type Site } from "@/lib/api"
 
-export function SiteList() {
+interface SiteListProps {
+  onSelectSite: (id: number) => void
+}
+
+export function SiteList({ onSelectSite }: SiteListProps) {
   const [sites, setSites] = useState<Site[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -54,7 +58,7 @@ export function SiteList() {
   return (
     <div className="grid gap-4">
       {sites.map((site) => (
-        <Card key={site.id} className="hover:shadow-md transition-shadow cursor-pointer">
+        <Card key={site.id} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => onSelectSite(site.id)}>
           <CardContent className="flex items-center gap-6 py-4">
             <ScoreRing score={site.latest_score} size={56} />
             <div className="flex-1 min-w-0">
