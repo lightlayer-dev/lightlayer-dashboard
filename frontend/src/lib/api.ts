@@ -51,3 +51,15 @@ export async function fetchScan(scanId: number): Promise<Scan> {
   if (!resp.ok) throw new Error("Failed to fetch scan")
   return resp.json()
 }
+
+export async function fetchSite(siteId: number): Promise<Site> {
+  const resp = await fetch(`${API_BASE}/api/sites/${siteId}`)
+  if (!resp.ok) throw new Error("Failed to fetch site")
+  return resp.json()
+}
+
+export async function fetchSiteScans(siteId: number, limit = 50): Promise<Scan[]> {
+  const resp = await fetch(`${API_BASE}/api/sites/${siteId}/scans?limit=${limit}`)
+  if (!resp.ok) throw new Error("Failed to fetch scans")
+  return resp.json()
+}
