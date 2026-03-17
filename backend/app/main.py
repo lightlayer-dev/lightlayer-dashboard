@@ -3,7 +3,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import scans, sites
+from app.api import api_keys, scans, sites
 from app.config import settings
 
 app = FastAPI(title=settings.app_name, version="0.1.0")
@@ -17,6 +17,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(api_keys.router)
 app.include_router(scans.router)
 app.include_router(sites.router)
 

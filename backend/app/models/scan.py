@@ -2,7 +2,7 @@
 
 from datetime import datetime
 
-from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, Text, func
+from sqlalchemy import DateTime, Float, ForeignKey, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -20,7 +20,7 @@ class Scan(Base):
     raw_json: Mapped[str | None] = mapped_column(Text)  # Full agent-bench JSON
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
-    site: Mapped["Site"] = relationship(back_populates="scans")
+    site: Mapped["Site"] = relationship(back_populates="scans")  # noqa: F821
     checks: Mapped[list["CheckResult"]] = relationship(
         back_populates="scan", cascade="all, delete-orphan"
     )

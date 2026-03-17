@@ -19,7 +19,7 @@ class Site(Base):
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
 
-    scans: Mapped[list["Scan"]] = relationship(back_populates="site", cascade="all, delete-orphan")
+    scans: Mapped[list["Scan"]] = relationship(back_populates="site", cascade="all, delete-orphan")  # noqa: F821
 
     def __repr__(self) -> str:
         return f"<Site {self.url}>"

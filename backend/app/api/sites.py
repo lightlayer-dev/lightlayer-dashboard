@@ -7,7 +7,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
-from app.models import Site, Scan, CheckResult
+from app.models import Site, Scan
 from app.api.schemas import SiteOut, ScoreTrendPoint, ScanOut, CheckResultOut
 
 router = APIRouter(prefix="/api/sites", tags=["sites"])
@@ -16,13 +16,6 @@ router = APIRouter(prefix="/api/sites", tags=["sites"])
 @router.get("/", response_model=list[SiteOut])
 async def list_sites(db: AsyncSession = Depends(get_db)):
     """List all tracked sites with their latest score."""
-    # Subquery for latest score per site
-    latest_scan = (
-        select(Scan.site_id, Scan.overall_score, func.max(Scan.created_at).label("latest"))
-        .group_by(Scan.site_id, Scan.overall_score)
-        .subquery()
-    )
-
     result = await db.execute(select(Site).order_by(Site.created_at.desc()))
     sites = result.scalars().all()
 

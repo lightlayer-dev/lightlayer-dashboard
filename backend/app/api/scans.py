@@ -12,12 +12,18 @@ from sqlalchemy.orm import selectinload
 from app.database import get_db
 from app.models import Site, Scan, CheckResult
 from app.api.schemas import ScanIn, ScanOut, CheckResultOut
+from app.auth import get_api_key
+from app.models import ApiKey as ApiKeyModel
 
 router = APIRouter(prefix="/api/scans", tags=["scans"])
 
 
 @router.post("/", response_model=ScanOut, status_code=201)
-async def ingest_scan(payload: ScanIn, db: AsyncSession = Depends(get_db)):
+async def ingest_scan(
+    payload: ScanIn,
+    db: AsyncSession = Depends(get_db),
+    _api_key: ApiKeyModel = Depends(get_api_key),
+):
     """Ingest an agent-bench analysis result.
 
     Creates the site if it doesn't exist, then stores the scan with all check results.
