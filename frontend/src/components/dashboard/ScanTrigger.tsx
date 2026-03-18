@@ -1,6 +1,6 @@
 /**Scan trigger — enter a URL and run agent-bench from the dashboard.*/
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { ScoreRing } from "./ScoreRing"
@@ -42,7 +42,6 @@ export function ScanTrigger({ onScanComplete }: Props) {
   useEffect(() => {
     if (pollingIds.size === 0) return
     const interval = setInterval(async () => {
-      let changed = false
       for (const id of pollingIds) {
         try {
           const job = await fetchScanJob(id)
@@ -54,7 +53,6 @@ export function ScanTrigger({ onScanComplete }: Props) {
               return next
             })
             if (job.status === "completed") onScanComplete?.()
-            changed = true
           }
         } catch {}
       }

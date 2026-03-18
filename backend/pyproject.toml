@@ -32,6 +32,9 @@ dev = [
     "aiosqlite>=0.20",
 ]
 
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
+
 [tool.ruff]
 target-version = "py311"
 line-length = 100
