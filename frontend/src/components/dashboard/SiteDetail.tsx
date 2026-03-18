@@ -93,7 +93,7 @@ export function SiteDetail({ siteId, onBack }: Props) {
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                 <XAxis dataKey="date" tick={{ fontSize: 12 }} className="text-muted-foreground" />
                 <YAxis domain={[0, 100]} tick={{ fontSize: 12 }} tickFormatter={(v) => `${v}%`} />
-                <Tooltip formatter={(v: number) => `${v}%`} />
+                <Tooltip formatter={(v) => `${Number(v)}%`} />
                 <Line type="monotone" dataKey="score" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 3 }} />
               </LineChart>
             </ResponsiveContainer>
@@ -111,7 +111,7 @@ export function SiteDetail({ siteId, onBack }: Props) {
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                 <XAxis type="number" domain={[0, 100]} tickFormatter={(v) => `${v}%`} />
                 <YAxis type="category" dataKey="name" tick={{ fontSize: 13 }} width={80} />
-                <Tooltip formatter={(v: number) => `${v}%`} />
+                <Tooltip formatter={(v) => `${Number(v)}%`} />
                 <Bar dataKey="score" radius={[0, 4, 4, 0]} barSize={24}>
                   {checkData.map((entry, i) => (
                     <Cell key={i} fill={scoreColor(entry.raw)} />

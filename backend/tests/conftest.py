@@ -6,8 +6,9 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 
 from app.database import Base, get_db
 from app.main import app
-from app.models import ApiKey  # noqa: F401
+from app.models import ApiKey, User  # noqa: F401
 from app.auth import generate_api_key, hash_api_key, key_prefix
+from app.api.users import pwd_context, create_access_token
 
 TEST_DB_URL = "sqlite+aiosqlite://"
 
@@ -40,11 +41,29 @@ async def client():
 
 
 @pytest_asyncio.fixture
-async def api_key_raw():
-    """Create a valid API key and return the raw key string."""
+async def test_user():
+    """Create a test user and return (user_id, auth_headers)."""
+    async with TestSession() as session:
+        user = User(
+            email="test@example.com",
+            hashed_password=pwd_context.hash("testpassword123"),
+            name="Test User",
+        )
+        session.add(user)
+        await session.commit()
+        await session.refresh(user)
+        token = create_access_token(user.id)
+        return user.id, {"Authorization": f"Bearer {token}"}
+
+
+@pytest_asyncio.fixture
+async def api_key_raw(test_user):
+    """Create a valid API key owned by test_user and return the raw key string."""
+    user_id, _ = test_user
     raw = generate_api_key()
     async with TestSession() as session:
         db_key = ApiKey(
+            user_id=user_id,
             key_hash=hash_api_key(raw),
             key_prefix=key_prefix(raw),
             name="test-key",

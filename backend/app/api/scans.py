@@ -28,14 +28,18 @@ async def ingest_scan(
 
     Creates the site if it doesn't exist, then stores the scan with all check results.
     """
-    # Find or create site
+    # Find or create site (scoped to the API key's owner)
+    owner_id = _api_key.user_id
     result = await db.execute(select(Site).where(Site.url == payload.url))
     site = result.scalar_one_or_none()
 
     if not site:
-        site = Site(url=payload.url)
+        site = Site(url=payload.url, user_id=owner_id)
         db.add(site)
         await db.flush()
+    elif site.user_id is None and owner_id is not None:
+        # Claim orphaned site
+        site.user_id = owner_id
 
     # Create scan
     scan = Scan(

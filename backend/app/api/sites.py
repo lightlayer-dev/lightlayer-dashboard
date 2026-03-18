@@ -1,4 +1,4 @@
-"""Sites API — list and retrieve tracked sites."""
+"""Sites API — list and retrieve tracked sites (authenticated)."""
 
 from __future__ import annotations
 
@@ -7,21 +7,26 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
-from app.models import Site, Scan
+from app.models import Site, Scan, User
 from app.api.schemas import SiteOut, ScoreTrendPoint, ScanOut, CheckResultOut
+from app.api.users import get_current_user
 
 router = APIRouter(prefix="/api/sites", tags=["sites"])
 
 
 @router.get("/", response_model=list[SiteOut])
-async def list_sites(db: AsyncSession = Depends(get_db)):
-    """List all tracked sites with their latest score."""
-    result = await db.execute(select(Site).order_by(Site.created_at.desc()))
+async def list_sites(
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """List tracked sites for the authenticated user."""
+    result = await db.execute(
+        select(Site).where(Site.user_id == user.id).order_by(Site.created_at.desc())
+    )
     sites = result.scalars().all()
 
     out = []
     for site in sites:
-        # Get latest score and count
         score_result = await db.execute(
             select(Scan.overall_score)
             .where(Scan.site_id == site.id)
@@ -48,8 +53,20 @@ async def list_sites(db: AsyncSession = Depends(get_db)):
 
 
 @router.get("/{site_id}/trend", response_model=list[ScoreTrendPoint])
-async def get_score_trend(site_id: int, limit: int = 50, db: AsyncSession = Depends(get_db)):
+async def get_score_trend(
+    site_id: int,
+    limit: int = 50,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
     """Get score history for a site (most recent first)."""
+    # Verify ownership
+    site_result = await db.execute(
+        select(Site).where(Site.id == site_id, Site.user_id == user.id)
+    )
+    if not site_result.scalar_one_or_none():
+        raise HTTPException(status_code=404, detail="Site not found")
+
     result = await db.execute(
         select(Scan.created_at, Scan.overall_score, Scan.source)
         .where(Scan.site_id == site_id)
@@ -61,9 +78,15 @@ async def get_score_trend(site_id: int, limit: int = 50, db: AsyncSession = Depe
 
 
 @router.get("/{site_id}", response_model=SiteOut)
-async def get_site(site_id: int, db: AsyncSession = Depends(get_db)):
+async def get_site(
+    site_id: int,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
     """Get a single site by ID."""
-    result = await db.execute(select(Site).where(Site.id == site_id))
+    result = await db.execute(
+        select(Site).where(Site.id == site_id, Site.user_id == user.id)
+    )
     site = result.scalar_one_or_none()
     if not site:
         raise HTTPException(status_code=404, detail="Site not found")
@@ -92,12 +115,18 @@ async def get_site(site_id: int, db: AsyncSession = Depends(get_db)):
 
 
 @router.get("/{site_id}/scans", response_model=list[ScanOut])
-async def list_site_scans(site_id: int, limit: int = 50, db: AsyncSession = Depends(get_db)):
+async def list_site_scans(
+    site_id: int,
+    limit: int = 50,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
     """List scans for a site with check results."""
     from sqlalchemy.orm import selectinload
 
-    # Verify site exists
-    site_result = await db.execute(select(Site).where(Site.id == site_id))
+    site_result = await db.execute(
+        select(Site).where(Site.id == site_id, Site.user_id == user.id)
+    )
     site = site_result.scalar_one_or_none()
     if not site:
         raise HTTPException(status_code=404, detail="Site not found")

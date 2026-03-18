@@ -1,5 +1,7 @@
 /**API client for the LightLayer Dashboard backend.*/
 
+import { authHeaders } from "@/hooks/useAuth"
+
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000"
 
 export interface Site {
@@ -34,32 +36,39 @@ export interface ScoreTrendPoint {
   source: string
 }
 
+function authedFetch(url: string, init?: RequestInit): Promise<Response> {
+  return fetch(url, {
+    ...init,
+    headers: { ...authHeaders(), ...init?.headers },
+  })
+}
+
 export async function fetchSites(): Promise<Site[]> {
-  const resp = await fetch(`${API_BASE}/api/sites/`)
+  const resp = await authedFetch(`${API_BASE}/api/sites/`)
   if (!resp.ok) throw new Error("Failed to fetch sites")
   return resp.json()
 }
 
 export async function fetchScoreTrend(siteId: number, limit = 50): Promise<ScoreTrendPoint[]> {
-  const resp = await fetch(`${API_BASE}/api/sites/${siteId}/trend?limit=${limit}`)
+  const resp = await authedFetch(`${API_BASE}/api/sites/${siteId}/trend?limit=${limit}`)
   if (!resp.ok) throw new Error("Failed to fetch trend")
   return resp.json()
 }
 
 export async function fetchScan(scanId: number): Promise<Scan> {
-  const resp = await fetch(`${API_BASE}/api/scans/${scanId}`)
+  const resp = await authedFetch(`${API_BASE}/api/scans/${scanId}`)
   if (!resp.ok) throw new Error("Failed to fetch scan")
   return resp.json()
 }
 
 export async function fetchSite(siteId: number): Promise<Site> {
-  const resp = await fetch(`${API_BASE}/api/sites/${siteId}`)
+  const resp = await authedFetch(`${API_BASE}/api/sites/${siteId}`)
   if (!resp.ok) throw new Error("Failed to fetch site")
   return resp.json()
 }
 
 export async function fetchSiteScans(siteId: number, limit = 50): Promise<Scan[]> {
-  const resp = await fetch(`${API_BASE}/api/sites/${siteId}/scans?limit=${limit}`)
+  const resp = await authedFetch(`${API_BASE}/api/sites/${siteId}/scans?limit=${limit}`)
   if (!resp.ok) throw new Error("Failed to fetch scans")
   return resp.json()
 }

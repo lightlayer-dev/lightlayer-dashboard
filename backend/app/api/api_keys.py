@@ -1,4 +1,4 @@
-"""API key management endpoints."""
+"""API key management endpoints (authenticated)."""
 
 from __future__ import annotations
 
@@ -9,7 +9,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth import generate_api_key, hash_api_key, key_prefix
 from app.database import get_db
-from app.models import ApiKey
+from app.models import ApiKey, User
+from app.api.users import get_current_user
 
 router = APIRouter(prefix="/api/keys", tags=["api-keys"])
 
@@ -23,7 +24,7 @@ class CreateKeyResponse(BaseModel):
     id: int
     name: str
     key_prefix: str
-    key: str  # Full key, shown only once
+    key: str
 
 
 class KeyInfo(BaseModel):
@@ -38,11 +39,16 @@ class KeyInfo(BaseModel):
 
 
 @router.post("/", response_model=CreateKeyResponse, status_code=201)
-async def create_api_key(body: CreateKeyRequest, db: AsyncSession = Depends(get_db)):
+async def create_api_key(
+    body: CreateKeyRequest,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
     """Create a new API key. The full key is returned ONCE."""
     raw_key = generate_api_key()
 
     db_key = ApiKey(
+        user_id=user.id,
         key_hash=hash_api_key(raw_key),
         key_prefix=key_prefix(raw_key),
         name=body.name,
@@ -60,9 +66,14 @@ async def create_api_key(body: CreateKeyRequest, db: AsyncSession = Depends(get_
 
 
 @router.get("/", response_model=list[KeyInfo])
-async def list_api_keys(db: AsyncSession = Depends(get_db)):
-    """List all API keys (without the raw key)."""
-    result = await db.execute(select(ApiKey).order_by(ApiKey.created_at.desc()))
+async def list_api_keys(
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """List all API keys for the authenticated user."""
+    result = await db.execute(
+        select(ApiKey).where(ApiKey.user_id == user.id).order_by(ApiKey.created_at.desc())
+    )
     keys = result.scalars().all()
     return [
         KeyInfo(
@@ -78,9 +89,15 @@ async def list_api_keys(db: AsyncSession = Depends(get_db)):
 
 
 @router.delete("/{key_id}", status_code=204)
-async def revoke_api_key(key_id: int, db: AsyncSession = Depends(get_db)):
+async def revoke_api_key(
+    key_id: int,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
     """Revoke (soft-delete) an API key."""
-    result = await db.execute(select(ApiKey).where(ApiKey.id == key_id))
+    result = await db.execute(
+        select(ApiKey).where(ApiKey.id == key_id, ApiKey.user_id == user.id)
+    )
     db_key = result.scalar_one_or_none()
     if not db_key:
         raise HTTPException(status_code=404, detail="API key not found")

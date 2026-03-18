@@ -1,9 +1,24 @@
 import { useState } from "react"
 import { SiteList } from "@/components/dashboard/SiteList"
 import { SiteDetail } from "@/components/dashboard/SiteDetail"
+import { AuthForm } from "@/components/auth/AuthForm"
+import { useAuth } from "@/hooks/useAuth"
 
 function App() {
   const [selectedSiteId, setSelectedSiteId] = useState<number | null>(null)
+  const { user, loading, login, register, logout } = useAuth()
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-muted-foreground">Loading...</div>
+      </div>
+    )
+  }
+
+  if (!user) {
+    return <AuthForm onLogin={login} onRegister={register} />
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -25,6 +40,13 @@ function App() {
               className="hover:text-foreground transition-colors">
               Blog
             </a>
+            <span className="text-foreground">{user.name || user.email}</span>
+            <button
+              onClick={logout}
+              className="hover:text-foreground transition-colors"
+            >
+              Sign out
+            </button>
           </nav>
         </div>
       </header>
