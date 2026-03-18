@@ -16,3 +16,4 @@ frontend/dist/
 # Env
 .env
 *.env.local
+backend/trend-history.json

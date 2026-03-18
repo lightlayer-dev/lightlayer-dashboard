@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { SiteList } from "@/components/dashboard/SiteList"
 import { SiteDetail } from "@/components/dashboard/SiteDetail"
+import { ScanTrigger } from "@/components/dashboard/ScanTrigger"
 import { ApiKeys } from "@/components/settings/ApiKeys"
 import { AuthForm } from "@/components/auth/AuthForm"
 import { useAuth } from "@/hooks/useAuth"
@@ -10,6 +11,7 @@ type Page = "dashboard" | "settings"
 function App() {
   const [selectedSiteId, setSelectedSiteId] = useState<number | null>(null)
   const [page, setPage] = useState<Page>("dashboard")
+  const [refreshKey, setRefreshKey] = useState(0)
   const { user, loading, login, register, logout } = useAuth()
 
   if (loading) {
@@ -82,7 +84,10 @@ function App() {
                 Track your sites' agent-readiness scores over time
               </p>
             </div>
-            <SiteList onSelectSite={setSelectedSiteId} />
+            <div className="mb-8">
+              <ScanTrigger onScanComplete={() => setRefreshKey(k => k + 1)} />
+            </div>
+            <SiteList key={refreshKey} onSelectSite={setSelectedSiteId} />
           </>
         )}
       </main>

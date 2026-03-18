@@ -18,9 +18,12 @@ TestSession = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=F
 
 @pytest_asyncio.fixture(autouse=True)
 async def setup_db():
+    from app.api.scan_jobs import set_session_factory
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+    set_session_factory(TestSession)
     yield
+    set_session_factory(None)
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
 

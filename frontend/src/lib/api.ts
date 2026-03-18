@@ -113,3 +113,39 @@ export async function revokeApiKey(keyId: number): Promise<void> {
   })
   if (!resp.ok) throw new Error("Failed to revoke API key")
 }
+
+// ── Scan Jobs ──────────────────────────────────────────────────────────
+
+export interface ScanJob {
+  id: number
+  url: string
+  status: "pending" | "running" | "completed" | "failed"
+  overall_score: number | null
+  scan_id: number | null
+  error: string | null
+  created_at: string
+  completed_at: string | null
+}
+
+export async function triggerScan(url: string): Promise<ScanJob> {
+  const resp = await authedFetch(`${API_BASE}/api/scan-jobs/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ url }),
+  })
+  if (resp.status === 409) throw new Error("A scan for this URL is already in progress")
+  if (!resp.ok) throw new Error("Failed to trigger scan")
+  return resp.json()
+}
+
+export async function fetchScanJob(jobId: number): Promise<ScanJob> {
+  const resp = await authedFetch(`${API_BASE}/api/scan-jobs/${jobId}`)
+  if (!resp.ok) throw new Error("Failed to fetch scan job")
+  return resp.json()
+}
+
+export async function fetchScanJobs(): Promise<ScanJob[]> {
+  const resp = await authedFetch(`${API_BASE}/api/scan-jobs/`)
+  if (!resp.ok) throw new Error("Failed to fetch scan jobs")
+  return resp.json()
+}
