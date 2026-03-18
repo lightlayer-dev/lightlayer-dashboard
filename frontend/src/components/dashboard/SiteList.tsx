@@ -47,9 +47,14 @@ export function SiteList({ onSelectSite }: SiteListProps) {
       <Card>
         <CardContent className="py-12 text-center">
           <h3 className="text-lg font-medium">No sites tracked yet</h3>
-          <p className="text-sm text-muted-foreground mt-2">
-            Run <code className="bg-muted px-1 py-0.5 rounded text-xs">agent-bench analyze https://your-site.com --output scan.json</code> and POST the result to get started.
+          <p className="text-sm text-muted-foreground mt-2 max-w-lg mx-auto">
+            Get started in 3 steps:
           </p>
+          <ol className="text-sm text-muted-foreground mt-3 text-left max-w-lg mx-auto space-y-2">
+            <li><strong>1.</strong> Go to <strong>Settings</strong> and create an API key</li>
+            <li><strong>2.</strong> Run <code className="bg-muted px-1 py-0.5 rounded text-xs">agent-bench analyze https://your-site.com --output scan.json</code></li>
+            <li><strong>3.</strong> Submit the result: <code className="bg-muted px-1 py-0.5 rounded text-xs">curl -X POST /api/scans/ -H "X-API-Key: YOUR_KEY" -d @scan.json</code></li>
+          </ol>
         </CardContent>
       </Card>
     )

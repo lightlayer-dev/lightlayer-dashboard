@@ -36,6 +36,22 @@ export interface ScoreTrendPoint {
   source: string
 }
 
+export interface ApiKeyInfo {
+  id: number
+  name: string
+  key_prefix: string
+  is_active: boolean
+  created_at: string
+  last_used_at: string | null
+}
+
+export interface ApiKeyCreated {
+  id: number
+  name: string
+  key_prefix: string
+  key: string
+}
+
 function authedFetch(url: string, init?: RequestInit): Promise<Response> {
   return fetch(url, {
     ...init,
@@ -71,4 +87,29 @@ export async function fetchSiteScans(siteId: number, limit = 50): Promise<Scan[]
   const resp = await authedFetch(`${API_BASE}/api/sites/${siteId}/scans?limit=${limit}`)
   if (!resp.ok) throw new Error("Failed to fetch scans")
   return resp.json()
+}
+
+// ── API Keys ───────────────────────────────────────────────────────────
+
+export async function fetchApiKeys(): Promise<ApiKeyInfo[]> {
+  const resp = await authedFetch(`${API_BASE}/api/keys/`)
+  if (!resp.ok) throw new Error("Failed to fetch API keys")
+  return resp.json()
+}
+
+export async function createApiKey(name: string): Promise<ApiKeyCreated> {
+  const resp = await authedFetch(`${API_BASE}/api/keys/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name }),
+  })
+  if (!resp.ok) throw new Error("Failed to create API key")
+  return resp.json()
+}
+
+export async function revokeApiKey(keyId: number): Promise<void> {
+  const resp = await authedFetch(`${API_BASE}/api/keys/${keyId}`, {
+    method: "DELETE",
+  })
+  if (!resp.ok) throw new Error("Failed to revoke API key")
 }
