@@ -7,6 +7,8 @@ from app.config import settings
 
 engine = create_async_engine(settings.database_url, echo=False)
 async_session = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+# Alias for background tasks that need to create their own sessions
+async_session_factory = async_session
 
 
 class Base(DeclarativeBase):
