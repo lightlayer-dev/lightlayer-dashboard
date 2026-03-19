@@ -149,3 +149,35 @@ export async function fetchScanJobs(): Promise<ScanJob[]> {
   if (!resp.ok) throw new Error("Failed to fetch scan jobs")
   return resp.json()
 }
+
+// ── Agent Analytics ────────────────────────────────────────────────────
+
+export interface AgentSummary {
+  agent: string
+  request_count: number
+  avg_duration_ms: number
+  error_count: number
+  last_seen: string
+}
+
+export interface TrafficPoint {
+  date: string
+  count: number
+}
+
+export interface AnalyticsOverview {
+  total_requests: number
+  unique_agents: number
+  avg_duration_ms: number
+  error_rate: number
+  by_agent: AgentSummary[]
+  daily_traffic: TrafficPoint[]
+}
+
+export async function fetchAnalytics(siteId?: number, days = 30): Promise<AnalyticsOverview> {
+  const params = new URLSearchParams({ days: String(days) })
+  if (siteId) params.set("site_id", String(siteId))
+  const resp = await authedFetch(`${API_BASE}/api/agent-events/analytics?${params}`)
+  if (!resp.ok) throw new Error("Failed to fetch analytics")
+  return resp.json()
+}
