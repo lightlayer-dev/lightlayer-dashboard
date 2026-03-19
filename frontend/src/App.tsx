@@ -3,10 +3,11 @@ import { SiteList } from "@/components/dashboard/SiteList"
 import { SiteDetail } from "@/components/dashboard/SiteDetail"
 import { ScanTrigger } from "@/components/dashboard/ScanTrigger"
 import { ApiKeys } from "@/components/settings/ApiKeys"
+import { AgentTraffic } from "@/components/analytics/AgentTraffic"
 import { AuthForm } from "@/components/auth/AuthForm"
 import { useAuth } from "@/hooks/useAuth"
 
-type Page = "dashboard" | "settings"
+type Page = "dashboard" | "analytics" | "settings"
 
 function App() {
   const [selectedSiteId, setSelectedSiteId] = useState<number | null>(null)
@@ -47,6 +48,12 @@ function App() {
               Dashboard
             </button>
             <button
+              onClick={() => { setPage("analytics"); setSelectedSiteId(null) }}
+              className={`hover:text-foreground transition-colors ${page === "analytics" ? "text-foreground font-medium" : ""}`}
+            >
+              Analytics
+            </button>
+            <button
               onClick={() => { setPage("settings"); setSelectedSiteId(null) }}
               className={`hover:text-foreground transition-colors ${page === "settings" ? "text-foreground font-medium" : ""}`}
             >
@@ -69,7 +76,15 @@ function App() {
 
       {/* Main */}
       <main className="container mx-auto px-4 py-8">
-        {page === "settings" ? (
+        {page === "analytics" ? (
+          <div>
+            <h2 className="text-2xl font-bold mb-2">Agent Traffic Analytics</h2>
+            <p className="text-muted-foreground mb-6">
+              Monitor which AI agents visit your sites, how often, and how they perform
+            </p>
+            <AgentTraffic />
+          </div>
+        ) : page === "settings" ? (
           <div>
             <h2 className="text-2xl font-bold mb-6">Settings</h2>
             <ApiKeys />
