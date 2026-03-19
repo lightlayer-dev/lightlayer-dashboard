@@ -11,7 +11,16 @@ frontend/    React + TypeScript (Vite)
 backend/     FastAPI + SQLAlchemy + Postgres
 ```
 
-## Quick Start
+## Quick Start (Docker)
+
+```bash
+cp .env.example .env
+# Edit .env with secure passwords
+docker compose up --build
+# Dashboard available at http://localhost
+```
+
+## Development
 
 ### Backend
 

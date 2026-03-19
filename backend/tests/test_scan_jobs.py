@@ -1,8 +1,6 @@
 """Scan job trigger API tests."""
 
-import json
 import pytest
-from unittest.mock import patch, AsyncMock, MagicMock
 from httpx import AsyncClient
 
 pytestmark = pytest.mark.asyncio
