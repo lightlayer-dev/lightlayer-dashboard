@@ -1,0 +1,30 @@
+{$DOMAIN} {
+	# API routes → backend
+	handle /api/* {
+		reverse_proxy backend:8000
+	}
+
+	# Agent protocol endpoints → backend
+	handle /llms.txt {
+		reverse_proxy backend:8000
+	}
+	handle /.well-known/agent.json {
+		reverse_proxy backend:8000
+	}
+
+	# Everything else → frontend (SPA)
+	handle {
+		reverse_proxy frontend:80
+	}
+
+	# Security headers
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		Referrer-Policy strict-origin-when-cross-origin
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+	}
+
+	# Compression
+	encode gzip zstd
+}

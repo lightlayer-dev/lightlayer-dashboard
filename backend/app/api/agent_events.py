@@ -9,7 +9,7 @@ from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
-from sqlalchemy import String, func, select, case, cast, Date
+from sqlalchemy import String, func, select, case, cast
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
