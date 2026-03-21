@@ -33,6 +33,9 @@ dev = [
     "aiosqlite>=0.20",
 ]
 
+[tool.hatch.metadata]
+allow-direct-references = true
+
 [tool.hatch.build.targets.wheel]
 packages = ["app"]
 
