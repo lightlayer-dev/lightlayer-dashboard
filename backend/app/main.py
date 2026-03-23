@@ -1,7 +1,11 @@
 """FastAPI application entry point."""
 
+from pathlib import Path
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from app.api import agent_events, api_keys, scan_jobs, scans, sites, users
 from app.config import settings
@@ -162,3 +166,23 @@ app.include_router(sites.router)
 @app.get("/api/health")
 async def health():
     return {"status": "ok", "app": settings.app_name}
+
+
+# ── Static Frontend (single-service deploy) ─────────────────────────────
+# Serves the built React SPA from /app/static when available.
+# In development, the Vite dev server handles this instead.
+
+STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
+
+if STATIC_DIR.is_dir():
+    # Serve static assets (JS, CSS, images)
+    app.mount("/assets", StaticFiles(directory=STATIC_DIR / "assets"), name="static-assets")
+
+    # Serve other static files (favicon, etc.)
+    @app.get("/{full_path:path}")
+    async def serve_spa(full_path: str):
+        """Serve the React SPA — all non-API routes return index.html."""
+        file_path = STATIC_DIR / full_path
+        if file_path.is_file():
+            return FileResponse(file_path)
+        return FileResponse(STATIC_DIR / "index.html")
