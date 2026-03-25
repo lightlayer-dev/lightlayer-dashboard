@@ -5,6 +5,7 @@ import { ScanTrigger } from "@/components/dashboard/ScanTrigger"
 import { ApiKeys } from "@/components/settings/ApiKeys"
 import { AgentTraffic } from "@/components/analytics/AgentTraffic"
 import { AuthForm } from "@/components/auth/AuthForm"
+import { PublicScan } from "@/components/public/PublicScan"
 import { useAuth } from "@/hooks/useAuth"
 
 type Page = "dashboard" | "analytics" | "settings"
@@ -13,6 +14,7 @@ function App() {
   const [selectedSiteId, setSelectedSiteId] = useState<number | null>(null)
   const [page, setPage] = useState<Page>("dashboard")
   const [refreshKey, setRefreshKey] = useState(0)
+  const [showAuth, setShowAuth] = useState(false)
   const { user, loading, login, register, logout } = useAuth()
 
   if (loading) {
@@ -24,7 +26,22 @@ function App() {
   }
 
   if (!user) {
-    return <AuthForm onLogin={login} onRegister={register} />
+    if (showAuth) {
+      return (
+        <div>
+          <div className="absolute top-4 left-4 z-10">
+            <button
+              onClick={() => setShowAuth(false)}
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              ← Back to scanner
+            </button>
+          </div>
+          <AuthForm onLogin={login} onRegister={register} />
+        </div>
+      )
+    }
+    return <PublicScan onShowAuth={() => setShowAuth(true)} />
   }
 
   const goHome = () => { setSelectedSiteId(null); setPage("dashboard") }

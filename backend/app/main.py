@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
-from app.api import agent_events, api_keys, scan_jobs, scans, sites, users
+from app.api import agent_events, api_keys, public_scan, scan_jobs, scans, sites, users
 from app.config import settings
 
 from agent_layer.fastapi import configure_agent_layer
@@ -161,6 +161,7 @@ app.include_router(agent_events.router)
 app.include_router(scans.router)
 app.include_router(scan_jobs.router)
 app.include_router(sites.router)
+app.include_router(public_scan.router)
 
 
 @app.get("/api/health")

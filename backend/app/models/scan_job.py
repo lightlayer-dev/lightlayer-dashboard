@@ -12,7 +12,7 @@ class ScanJob(Base):
     __tablename__ = "scan_jobs"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True, index=True)
     url: Mapped[str] = mapped_column(String(2048))
     status: Mapped[str] = mapped_column(String(20), default="pending")  # pending, running, completed, failed
     overall_score: Mapped[float | None] = mapped_column(Float, nullable=True)

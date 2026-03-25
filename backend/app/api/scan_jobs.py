@@ -106,7 +106,7 @@ def set_session_factory(factory):
     _session_factory_override = factory
 
 
-async def run_scan_job(job_id: int, url: str, user_id: int) -> None:
+async def run_scan_job(job_id: int, url: str, user_id: int | None) -> None:
     """Background task: run agent-bench and ingest results."""
     from app.database import async_session_factory
     factory = _session_factory_override or async_session_factory
