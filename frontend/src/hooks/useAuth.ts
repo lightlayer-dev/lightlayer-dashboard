@@ -16,10 +16,12 @@ interface AuthState {
 const API_BASE = "/api/auth"
 
 export function useAuth() {
+  const savedToken = localStorage.getItem("ll_token")
+
   const [state, setState] = useState<AuthState>({
     user: null,
-    token: localStorage.getItem("ll_token"),
-    loading: true,
+    token: savedToken,
+    loading: !!savedToken, // only loading if we need to validate a token
   })
 
   const setAuth = useCallback((token: string, user: User) => {
@@ -34,25 +36,21 @@ export function useAuth() {
 
   // Check token validity on mount
   useEffect(() => {
-    const token = localStorage.getItem("ll_token")
-    if (!token) {
-      setState({ token: null, user: null, loading: false })
-      return
-    }
+    if (!savedToken) return
 
     fetch(`${API_BASE}/me`, {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { Authorization: `Bearer ${savedToken}` },
     })
       .then((r) => {
         if (!r.ok) throw new Error("Invalid token")
         return r.json()
       })
-      .then((user) => setState({ token, user, loading: false }))
+      .then((user) => setState({ token: savedToken, user, loading: false }))
       .catch(() => {
         localStorage.removeItem("ll_token")
         setState({ token: null, user: null, loading: false })
       })
-  }, [])
+  }, [savedToken])
 
   const register = async (email: string, password: string, name?: string) => {
     const r = await fetch(`${API_BASE}/register`, {

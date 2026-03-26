@@ -54,7 +54,9 @@ export function ScanTrigger({ onScanComplete }: Props) {
             })
             if (job.status === "completed") onScanComplete?.()
           }
-        } catch {}
+        } catch {
+          // Silently ignore poll failures — job will be retried next interval
+        }
       }
     }, 2000)
     return () => clearInterval(interval)
@@ -72,8 +74,8 @@ export function ScanTrigger({ onScanComplete }: Props) {
       setJobs(prev => [job, ...prev])
       setPollingIds(prev => new Set(prev).add(job.id))
       setUrl("")
-    } catch (e: any) {
-      setError(e.message)
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Scan failed")
     } finally {
       setSubmitting(false)
     }
