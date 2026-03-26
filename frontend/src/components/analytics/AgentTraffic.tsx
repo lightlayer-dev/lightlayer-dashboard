@@ -12,12 +12,19 @@ export function AgentTraffic() {
   const [days, setDays] = useState(30)
 
   useEffect(() => {
-    setLoading(true)
+    let cancelled = false
     fetchAnalytics(undefined, days)
-      .then(setData)
-      .catch(() => setData(null))
-      .finally(() => setLoading(false))
+      .then((result) => { if (!cancelled) setData(result) })
+      .catch(() => { if (!cancelled) setData(null) })
+      .finally(() => { if (!cancelled) setLoading(false) })
+    return () => { cancelled = true }
   }, [days])
+
+  // Reset loading state synchronously on days change
+  const handleDaysChange = (d: number) => {
+    setLoading(true)
+    setDays(d)
+  }
 
   if (loading) {
     return <div className="text-muted-foreground py-8 text-center">Loading analytics...</div>
@@ -53,7 +60,7 @@ app.use(agentAnalytics({
         {[7, 30, 90].map((d) => (
           <button
             key={d}
-            onClick={() => setDays(d)}
+            onClick={() => handleDaysChange(d)}
             className={`px-3 py-1 rounded text-sm transition-colors ${
               days === d
                 ? "bg-primary text-primary-foreground"
