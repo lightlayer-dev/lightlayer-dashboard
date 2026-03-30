@@ -9,7 +9,7 @@ from alembic import op
 import sqlalchemy as sa
 
 revision = "001_add_scan_jobs"
-down_revision = None
+down_revision = "000_initial_tables"
 branch_labels = None
 depends_on = None
 
