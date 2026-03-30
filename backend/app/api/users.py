@@ -52,7 +52,9 @@ class TokenResponse(BaseModel):
 
 def create_access_token(user_id: int) -> str:
     expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    return jwt.encode({"sub": str(user_id), "exp": expire}, settings.secret_key, algorithm=ALGORITHM)
+    return jwt.encode(
+        {"sub": str(user_id), "exp": expire}, settings.secret_key, algorithm=ALGORITHM
+    )
 
 
 async def get_current_user(

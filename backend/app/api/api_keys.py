@@ -21,6 +21,7 @@ class CreateKeyRequest(BaseModel):
 
 class CreateKeyResponse(BaseModel):
     """Returned only on creation — the raw key is shown once."""
+
     id: int
     name: str
     key_prefix: str
@@ -95,9 +96,7 @@ async def revoke_api_key(
     db: AsyncSession = Depends(get_db),
 ):
     """Revoke (soft-delete) an API key."""
-    result = await db.execute(
-        select(ApiKey).where(ApiKey.id == key_id, ApiKey.user_id == user.id)
-    )
+    result = await db.execute(select(ApiKey).where(ApiKey.id == key_id, ApiKey.user_id == user.id))
     db_key = result.scalar_one_or_none()
     if not db_key:
         raise HTTPException(status_code=404, detail="API key not found")

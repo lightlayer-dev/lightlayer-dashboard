@@ -39,6 +39,7 @@ class AgentEventIn(BaseModel):
 
 class EventBatchIn(BaseModel):
     """Batch of events sent by agent-layer middleware."""
+
     url: str | None = None  # Site URL; if absent, derived from API key's sites
     events: list[AgentEventIn] = Field(..., max_length=500)
 
@@ -94,9 +95,7 @@ async def ingest_events(
 
     if not site:
         # Try to find a site owned by this user (use first one)
-        result = await db.execute(
-            select(Site).where(Site.user_id == api_key.user_id).limit(1)
-        )
+        result = await db.execute(select(Site).where(Site.user_id == api_key.user_id).limit(1))
         site = result.scalar_one_or_none()
         if not site:
             raise HTTPException(
@@ -182,9 +181,7 @@ async def get_analytics(
             AgentEvent.agent_name,
             func.count(AgentEvent.id).label("cnt"),
             func.avg(AgentEvent.duration_ms).label("avg_dur"),
-            func.sum(
-                case((AgentEvent.status_code >= 400, 1), else_=0)
-            ).label("errs"),
+            func.sum(case((AgentEvent.status_code >= 400, 1), else_=0)).label("errs"),
             cast(func.max(AgentEvent.event_timestamp), String).label("last_seen"),
         )
         .select_from(AgentEvent)
@@ -220,10 +217,7 @@ async def get_analytics(
         .order_by(day_expr)
     )
     daily_rows = (await db.execute(daily_q)).all()
-    daily_traffic = [
-        TrafficPoint(date=str(r.day), count=r.cnt)
-        for r in daily_rows
-    ]
+    daily_traffic = [TrafficPoint(date=str(r.day), count=r.cnt) for r in daily_rows]
 
     return AnalyticsOverview(
         total_requests=total,

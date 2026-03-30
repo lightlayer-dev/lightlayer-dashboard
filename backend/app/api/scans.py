@@ -84,7 +84,9 @@ async def ingest_scan(
 async def get_scan(scan_id: int, db: AsyncSession = Depends(get_db)):
     """Get a single scan by ID."""
     result = await db.execute(
-        select(Scan).where(Scan.id == scan_id).options(selectinload(Scan.checks), selectinload(Scan.site))
+        select(Scan)
+        .where(Scan.id == scan_id)
+        .options(selectinload(Scan.checks), selectinload(Scan.site))
     )
     scan = result.scalar_one_or_none()
     if not scan:
