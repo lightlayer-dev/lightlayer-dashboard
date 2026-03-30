@@ -63,7 +63,7 @@ configure_agent_layer(
                     title="Scanning",
                     content=(
                         "POST /api/scans — Start a new agent-readiness scan. "
-                        "Body: {\"url\": \"https://example.com\"}. "
+                        'Body: {"url": "https://example.com"}. '
                         "Returns a scan job ID. Poll GET /api/scan-jobs/{id} for results. "
                         "Scans evaluate 8 dimensions: API availability, documentation quality, "
                         "structured data, authentication patterns, error handling, cost transparency, "

@@ -19,6 +19,7 @@ class CheckResultIn(BaseModel):
 
 class ScanIn(BaseModel):
     """Payload from agent-bench CLI or CI integration."""
+
     url: str
     overall_score: float
     checks: list[CheckResultIn]

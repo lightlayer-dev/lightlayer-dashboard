@@ -109,6 +109,7 @@ def set_session_factory(factory):
 async def run_scan_job(job_id: int, url: str, user_id: int) -> None:
     """Background task: run agent-bench and ingest results."""
     from app.database import async_session_factory
+
     factory = _session_factory_override or async_session_factory
 
     async with factory() as db:
@@ -124,17 +125,27 @@ async def run_scan_job(job_id: int, url: str, user_id: int) -> None:
                 output_path = f.name
 
             proc = await asyncio.create_subprocess_exec(
-                "agent-bench", "analyze", url, "--format", "json", "--output", output_path, "--quiet",
+                "agent-bench",
+                "analyze",
+                url,
+                "--format",
+                "json",
+                "--output",
+                output_path,
+                "--quiet",
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
             )
             stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=120)
 
             if proc.returncode != 0:
-                raise RuntimeError(f"agent-bench failed (exit {proc.returncode}): {stderr.decode()[:500]}")
+                raise RuntimeError(
+                    f"agent-bench failed (exit {proc.returncode}): {stderr.decode()[:500]}"
+                )
 
             # Read results
             import pathlib
+
             raw = pathlib.Path(output_path).read_text()
             data = json.loads(raw)
 

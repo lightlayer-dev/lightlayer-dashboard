@@ -35,19 +35,19 @@ async def list_sites(
         )
         latest_score = score_result.scalar_one_or_none()
 
-        count_result = await db.execute(
-            select(func.count()).where(Scan.site_id == site.id)
-        )
+        count_result = await db.execute(select(func.count()).where(Scan.site_id == site.id))
         scan_count = count_result.scalar()
 
-        out.append(SiteOut(
-            id=site.id,
-            url=site.url,
-            name=site.name,
-            created_at=site.created_at,
-            latest_score=latest_score,
-            scan_count=scan_count or 0,
-        ))
+        out.append(
+            SiteOut(
+                id=site.id,
+                url=site.url,
+                name=site.name,
+                created_at=site.created_at,
+                latest_score=latest_score,
+                scan_count=scan_count or 0,
+            )
+        )
 
     return out
 
@@ -61,9 +61,7 @@ async def get_score_trend(
 ):
     """Get score history for a site (most recent first)."""
     # Verify ownership
-    site_result = await db.execute(
-        select(Site).where(Site.id == site_id, Site.user_id == user.id)
-    )
+    site_result = await db.execute(select(Site).where(Site.id == site_id, Site.user_id == user.id))
     if not site_result.scalar_one_or_none():
         raise HTTPException(status_code=404, detail="Site not found")
 
@@ -84,9 +82,7 @@ async def get_site(
     db: AsyncSession = Depends(get_db),
 ):
     """Get a single site by ID."""
-    result = await db.execute(
-        select(Site).where(Site.id == site_id, Site.user_id == user.id)
-    )
+    result = await db.execute(select(Site).where(Site.id == site_id, Site.user_id == user.id))
     site = result.scalar_one_or_none()
     if not site:
         raise HTTPException(status_code=404, detail="Site not found")
@@ -99,9 +95,7 @@ async def get_site(
     )
     latest_score = score_result.scalar_one_or_none()
 
-    count_result = await db.execute(
-        select(func.count()).where(Scan.site_id == site.id)
-    )
+    count_result = await db.execute(select(func.count()).where(Scan.site_id == site.id))
     scan_count = count_result.scalar()
 
     return SiteOut(
@@ -124,9 +118,7 @@ async def list_site_scans(
     """List scans for a site with check results."""
     from sqlalchemy.orm import selectinload
 
-    site_result = await db.execute(
-        select(Site).where(Site.id == site_id, Site.user_id == user.id)
-    )
+    site_result = await db.execute(select(Site).where(Site.id == site_id, Site.user_id == user.id))
     site = site_result.scalar_one_or_none()
     if not site:
         raise HTTPException(status_code=404, detail="Site not found")

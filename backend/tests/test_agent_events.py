@@ -36,10 +36,14 @@ SAMPLE_EVENTS = [
 
 @pytest.mark.anyio
 async def test_ingest_events(client, api_key_raw):
-    resp = await client.post("/api/agent-events/", json={
-        "url": "https://example.com",
-        "events": SAMPLE_EVENTS[:2],
-    }, headers={"X-API-Key": api_key_raw})
+    resp = await client.post(
+        "/api/agent-events/",
+        json={
+            "url": "https://example.com",
+            "events": SAMPLE_EVENTS[:2],
+        },
+        headers={"X-API-Key": api_key_raw},
+    )
 
     assert resp.status_code == 201
     assert resp.json()["ingested"] == 2
@@ -47,9 +51,13 @@ async def test_ingest_events(client, api_key_raw):
 
 @pytest.mark.anyio
 async def test_ingest_empty_batch(client, api_key_raw):
-    resp = await client.post("/api/agent-events/", json={
-        "events": [],
-    }, headers={"X-API-Key": api_key_raw})
+    resp = await client.post(
+        "/api/agent-events/",
+        json={
+            "events": [],
+        },
+        headers={"X-API-Key": api_key_raw},
+    )
 
     assert resp.status_code == 201
     assert resp.json()["ingested"] == 0
@@ -57,10 +65,13 @@ async def test_ingest_empty_batch(client, api_key_raw):
 
 @pytest.mark.anyio
 async def test_ingest_requires_api_key(client):
-    resp = await client.post("/api/agent-events/", json={
-        "url": "https://example.com",
-        "events": SAMPLE_EVENTS[:1],
-    })
+    resp = await client.post(
+        "/api/agent-events/",
+        json={
+            "url": "https://example.com",
+            "events": SAMPLE_EVENTS[:1],
+        },
+    )
     assert resp.status_code == 401
 
 
@@ -69,10 +80,14 @@ async def test_analytics_overview(client, test_user, api_key_raw):
     _, jwt_headers = test_user
 
     # Ingest events
-    await client.post("/api/agent-events/", json={
-        "url": "https://example.com",
-        "events": SAMPLE_EVENTS,
-    }, headers={"X-API-Key": api_key_raw})
+    await client.post(
+        "/api/agent-events/",
+        json={
+            "url": "https://example.com",
+            "events": SAMPLE_EVENTS,
+        },
+        headers={"X-API-Key": api_key_raw},
+    )
 
     resp = await client.get("/api/agent-events/analytics?days=30", headers=jwt_headers)
     assert resp.status_code == 200
@@ -101,10 +116,14 @@ async def test_analytics_empty(client, test_user):
 @pytest.mark.anyio
 async def test_ingest_creates_site(client, api_key_raw):
     """Ingesting events with a URL auto-creates the site."""
-    resp = await client.post("/api/agent-events/", json={
-        "url": "https://newsite.example.com",
-        "events": SAMPLE_EVENTS[:1],
-    }, headers={"X-API-Key": api_key_raw})
+    resp = await client.post(
+        "/api/agent-events/",
+        json={
+            "url": "https://newsite.example.com",
+            "events": SAMPLE_EVENTS[:1],
+        },
+        headers={"X-API-Key": api_key_raw},
+    )
 
     assert resp.status_code == 201
     assert resp.json()["ingested"] == 1

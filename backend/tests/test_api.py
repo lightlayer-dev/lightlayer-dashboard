@@ -19,11 +19,14 @@ async def test_health(client: AsyncClient):
 
 
 async def test_register(client: AsyncClient):
-    r = await client.post("/api/auth/register", json={
-        "email": "new@example.com",
-        "password": "securepass123",
-        "name": "New User",
-    })
+    r = await client.post(
+        "/api/auth/register",
+        json={
+            "email": "new@example.com",
+            "password": "securepass123",
+            "name": "New User",
+        },
+    )
     assert r.status_code == 201
     data = r.json()
     assert data["access_token"]
@@ -31,35 +34,47 @@ async def test_register(client: AsyncClient):
 
 
 async def test_register_duplicate(client: AsyncClient, test_user):
-    r = await client.post("/api/auth/register", json={
-        "email": "test@example.com",
-        "password": "securepass123",
-    })
+    r = await client.post(
+        "/api/auth/register",
+        json={
+            "email": "test@example.com",
+            "password": "securepass123",
+        },
+    )
     assert r.status_code == 409
 
 
 async def test_register_short_password(client: AsyncClient):
-    r = await client.post("/api/auth/register", json={
-        "email": "short@example.com",
-        "password": "short",
-    })
+    r = await client.post(
+        "/api/auth/register",
+        json={
+            "email": "short@example.com",
+            "password": "short",
+        },
+    )
     assert r.status_code == 422
 
 
 async def test_login(client: AsyncClient, test_user):
-    r = await client.post("/api/auth/login", data={
-        "username": "test@example.com",
-        "password": "testpassword123",
-    })
+    r = await client.post(
+        "/api/auth/login",
+        data={
+            "username": "test@example.com",
+            "password": "testpassword123",
+        },
+    )
     assert r.status_code == 200
     assert r.json()["access_token"]
 
 
 async def test_login_bad_password(client: AsyncClient, test_user):
-    r = await client.post("/api/auth/login", data={
-        "username": "test@example.com",
-        "password": "wrongpassword",
-    })
+    r = await client.post(
+        "/api/auth/login",
+        data={
+            "username": "test@example.com",
+            "password": "wrongpassword",
+        },
+    )
     assert r.status_code == 401
 
 
@@ -129,16 +144,12 @@ async def test_ingest_scan_requires_auth(client: AsyncClient):
 
 
 async def test_ingest_scan_invalid_key(client: AsyncClient):
-    r = await client.post(
-        "/api/scans/", json=SAMPLE_SCAN, headers={"X-API-Key": "ll_bogus"}
-    )
+    r = await client.post("/api/scans/", json=SAMPLE_SCAN, headers={"X-API-Key": "ll_bogus"})
     assert r.status_code == 401
 
 
 async def test_ingest_scan_success(client: AsyncClient, api_key_raw: str):
-    r = await client.post(
-        "/api/scans/", json=SAMPLE_SCAN, headers={"X-API-Key": api_key_raw}
-    )
+    r = await client.post("/api/scans/", json=SAMPLE_SCAN, headers={"X-API-Key": api_key_raw})
     assert r.status_code == 201
     data = r.json()
     assert data["overall_score"] == 0.72
@@ -172,9 +183,7 @@ async def test_list_sites_empty(client: AsyncClient, test_user):
 
 async def test_list_sites_after_scan(client: AsyncClient, api_key_raw: str, test_user):
     _, headers = test_user
-    await client.post(
-        "/api/scans/", json=SAMPLE_SCAN, headers={"X-API-Key": api_key_raw}
-    )
+    await client.post("/api/scans/", json=SAMPLE_SCAN, headers={"X-API-Key": api_key_raw})
     r = await client.get("/api/sites/", headers=headers)
     assert r.status_code == 200
     sites = r.json()
