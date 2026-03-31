@@ -1,11 +1,17 @@
 """Scan model — a single agent-bench analysis result."""
 
+from __future__ import annotations
+
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import DateTime, Float, ForeignKey, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
+
+if TYPE_CHECKING:
+    from app.models.site import Site  # noqa: F401
 
 
 class Scan(Base):

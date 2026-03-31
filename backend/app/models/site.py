@@ -1,11 +1,17 @@
 """Site model — a website being tracked."""
 
+from __future__ import annotations
+
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import ForeignKey, String, DateTime, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
+
+if TYPE_CHECKING:
+    from app.models.scan import Scan  # noqa: F401
 
 
 class Site(Base):
